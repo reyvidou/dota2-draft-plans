@@ -2,11 +2,12 @@ FROM node:22-alpine
 
 WORKDIR /app
 
-RUN npm install -g nodemon ts-node typescript
+RUN yarn global add nodemon ts-node typescript
 
-COPY package*.json ./
-RUN npm install
+COPY package.json yarn.lock ./
+
+RUN yarn install
 
 EXPOSE 3000
 
-CMD ["npm", "run", "dev"]
+CMD ["yarn", "run", "dev"]
