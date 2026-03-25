@@ -7,6 +7,7 @@ import type {
 } from "../types/types";
 import { PRIORITY_COLORS } from "../constants/constants";
 import { Modal, HeroBadge, Icon } from "./SharedUI";
+
 interface SummaryModalProps {
   plan: DraftPlan;
   heroMap: Record<number, OpenDotaHero>;
@@ -18,13 +19,6 @@ export default function SummaryModal({
   heroMap,
   onClose,
 }: SummaryModalProps): JSX.Element {
-  interface SectionProps {
-    title: string;
-    color: string;
-    children: ReactNode;
-    count: number;
-  }
-
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -79,38 +73,32 @@ export default function SummaryModal({
     }
   };
 
+  interface SectionProps {
+    title: string;
+    color: string;
+    children: ReactNode;
+    count: number;
+  }
+
   const Section = ({
     title,
     color,
     children,
     count,
   }: SectionProps): JSX.Element => (
-    <div style={{ marginBottom: 28 }}>
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: 10,
-          marginBottom: 12,
-        }}
-      >
+    <div className="mb-7">
+      <div className="flex items-center gap-2.5 mb-3">
         <div
-          style={{ width: 3, height: 18, background: color, borderRadius: 2 }}
+          className="w-[3px] h-[18px] rounded-sm"
+          style={{ backgroundColor: color }}
         />
         <h3
-          style={{
-            margin: 0,
-            fontSize: 13,
-            fontWeight: 700,
-            color,
-            textTransform: "uppercase",
-            letterSpacing: 2,
-            fontFamily: "'Rajdhani', sans-serif",
-          }}
+          className="m-0 text-[13px] font-bold uppercase tracking-widest font-['Rajdhani']"
+          style={{ color }}
         >
           {title}
         </h3>
-        <span style={{ fontSize: 12, color: "#4a6080" }}>({count})</span>
+        <span className="text-xs text-[#4a6080]">({count})</span>
       </div>
       {children}
     </div>
@@ -124,26 +112,12 @@ export default function SummaryModal({
 
   return (
     <Modal onClose={onClose} title={`Draft Summary — ${plan.name}`} wide>
-      <div style={{ padding: "24px 28px" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "flex-start",
-            marginBottom: 24,
-          }}
-        >
-          <div style={{ flex: 1 }}>
+      <div className="p-6 sm:px-7">
+        {/* Header Area */}
+        <div className="flex justify-between items-start mb-6">
+          <div className="flex-1 pr-4">
             {plan.desc && (
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: 14,
-                  color: "#6080a0",
-                  fontStyle: "italic",
-                  lineHeight: 1.6,
-                }}
-              >
+              <p className="m-0 text-sm text-[#6080a0] italic leading-relaxed">
                 {plan.desc}
               </p>
             )}
@@ -151,60 +125,31 @@ export default function SummaryModal({
 
           <button
             onClick={handleCopy}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "8px 16px",
-              background: copied ? "#1e5040" : "#1e3050",
-              border: copied ? "1px solid #44cc88" : "1px solid #2a4060",
-              borderRadius: 8,
-              color: copied ? "#44cc88" : "#c8d8f0",
-              cursor: "pointer",
-              fontSize: 13,
-              fontWeight: 700,
-              fontFamily: "'Rajdhani', sans-serif",
-              letterSpacing: 1,
-              transition: "all 0.2s ease",
-            }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg cursor-pointer text-[13px] font-bold font-['Rajdhani'] tracking-wider transition-all duration-200 shrink-0 ${
+              copied
+                ? "bg-[#1e5040] border border-[#44cc88] text-[#44cc88]"
+                : "bg-[#1e3050] border border-[#2a4060] text-[#c8d8f0] hover:bg-[#2a4060] hover:text-white"
+            }`}
           >
-            {copied ? (
-              <Icon name="check" size={16} />
-            ) : (
-              <Icon name="edit" size={16} />
-            )}
+            <Icon name={copied ? "check" : "edit"} size={16} />
             {copied ? "COPIED!" : "COPY TO CLIPBOARD"}
           </button>
         </div>
 
+        {/* Ban List Section */}
         <Section title="Ban List" color="#c84040" count={plan.bans.length}>
           {plan.bans.length === 0 ? (
-            <span style={{ fontSize: 13, color: "#2a3a52" }}>
-              No bans defined
-            </span>
+            <span className="text-[13px] text-[#2a3a52]">No bans defined</span>
           ) : (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            <div className="flex flex-wrap gap-2">
               {plan.bans.map((b) => (
                 <div
                   key={b.id}
-                  style={{
-                    background: "#c8404015",
-                    border: "1px solid #c8404040",
-                    borderRadius: 8,
-                    padding: "8px 12px",
-                    minWidth: 140,
-                  }}
+                  className="bg-[#c84040]/10 border border-[#c84040]/25 rounded-lg px-3 py-2 min-w-[140px]"
                 >
                   <HeroBadge hero={heroMap[b.heroId]} size="sm" />
                   {b.note && (
-                    <div
-                      style={{
-                        fontSize: 11,
-                        color: "#6080a0",
-                        marginTop: 4,
-                        fontStyle: "italic",
-                      }}
-                    >
+                    <div className="text-[11px] text-[#6080a0] mt-1 italic">
                       {b.note}
                     </div>
                   )}
@@ -214,15 +159,14 @@ export default function SummaryModal({
           )}
         </Section>
 
+        {/* Preferred Picks Section */}
         <Section
           title="Preferred Picks"
           color="#44cc88"
           count={plan.picks.length}
         >
           {plan.picks.length === 0 ? (
-            <span style={{ fontSize: 13, color: "#2a3a52" }}>
-              No picks defined
-            </span>
+            <span className="text-[13px] text-[#2a3a52]">No picks defined</span>
           ) : (
             <div>
               {(
@@ -233,56 +177,39 @@ export default function SummaryModal({
                 ] as [string, PickEntry[]][]
               ).map(([prio, group]) =>
                 group.length > 0 ? (
-                  <div key={prio} style={{ marginBottom: 12 }}>
+                  <div key={prio} className="mb-3">
                     <div
+                      className="text-[11px] font-bold mb-1.5 uppercase tracking-wider"
                       style={{
-                        fontSize: 11,
                         color: PRIORITY_COLORS[prio as Priority] ?? "#4a6080",
-                        fontWeight: 700,
-                        marginBottom: 6,
-                        textTransform: "uppercase",
-                        letterSpacing: 1,
                       }}
                     >
                       {prio} Priority
                     </div>
-                    <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
-                      {group.map((p) => (
-                        <div
-                          key={p.id}
-                          style={{
-                            background: "#44cc8812",
-                            border: `1px solid ${PRIORITY_COLORS[p.priority as Priority] ?? "#44cc88"}40`,
-                            borderRadius: 8,
-                            padding: "8px 12px",
-                            minWidth: 140,
-                          }}
-                        >
-                          <HeroBadge hero={heroMap[p.heroId]} size="sm" />
-                          {p.role && (
-                            <div
-                              style={{
-                                fontSize: 11,
-                                color: "#4a6080",
-                                marginTop: 4,
-                              }}
-                            >
-                              📍 {p.role}
-                            </div>
-                          )}
-                          {p.note && (
-                            <div
-                              style={{
-                                fontSize: 11,
-                                color: "#6080a0",
-                                fontStyle: "italic",
-                              }}
-                            >
-                              {p.note}
-                            </div>
-                          )}
-                        </div>
-                      ))}
+                    <div className="flex flex-wrap gap-2">
+                      {group.map((p) => {
+                        const borderColor =
+                          PRIORITY_COLORS[p.priority as Priority] ?? "#44cc88";
+                        return (
+                          <div
+                            key={p.id}
+                            className="bg-[#44cc88]/10 rounded-lg px-3 py-2 min-w-[140px] border"
+                            style={{ borderColor: `${borderColor}40` }}
+                          >
+                            <HeroBadge hero={heroMap[p.heroId]} size="sm" />
+                            {p.role && (
+                              <div className="text-[11px] text-[#4a6080] mt-1">
+                                📍 {p.role}
+                              </div>
+                            )}
+                            {p.note && (
+                              <div className="text-[11px] text-[#6080a0] italic mt-0.5">
+                                {p.note}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </div>
                 ) : null,
@@ -291,38 +218,26 @@ export default function SummaryModal({
           )}
         </Section>
 
+        {/* Enemy Threats Section */}
         <Section
           title="Enemy Threats"
           color="#ffaa00"
           count={plan.threats.length}
         >
           {plan.threats.length === 0 ? (
-            <span style={{ fontSize: 13, color: "#2a3a52" }}>
+            <span className="text-[13px] text-[#2a3a52]">
               No threats defined
             </span>
           ) : (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            <div className="flex flex-wrap gap-2">
               {plan.threats.map((t) => (
                 <div
                   key={t.id}
-                  style={{
-                    background: "#ffaa0012",
-                    border: "1px solid #ffaa0040",
-                    borderRadius: 8,
-                    padding: "8px 12px",
-                    minWidth: 140,
-                  }}
+                  className="bg-[#ffaa00]/10 border border-[#ffaa00]/25 rounded-lg px-3 py-2 min-w-[140px]"
                 >
                   <HeroBadge hero={heroMap[t.heroId]} size="sm" />
                   {t.note && (
-                    <div
-                      style={{
-                        fontSize: 11,
-                        color: "#6080a0",
-                        marginTop: 4,
-                        fontStyle: "italic",
-                      }}
-                    >
+                    <div className="text-[11px] text-[#6080a0] mt-1 italic">
                       {t.note}
                     </div>
                   )}
@@ -332,49 +247,28 @@ export default function SummaryModal({
           )}
         </Section>
 
+        {/* Item Timings Section */}
         <Section
           title="Item Timings"
           color="#4080c8"
           count={plan.timings.length}
         >
           {plan.timings.length === 0 ? (
-            <span style={{ fontSize: 13, color: "#2a3a52" }}>
+            <span className="text-[13px] text-[#2a3a52]">
               No timings defined
             </span>
           ) : (
-            <div style={{ display: "grid", gap: 8 }}>
+            <div className="grid gap-2">
               {plan.timings.map((t) => (
                 <div
                   key={t.id}
-                  style={{
-                    background: "#4080c812",
-                    border: "1px solid #4080c840",
-                    borderRadius: 8,
-                    padding: "10px 14px",
-                    display: "flex",
-                    gap: 14,
-                    alignItems: "flex-start",
-                  }}
+                  className="bg-[#4080c8]/10 border border-[#4080c8]/25 rounded-lg py-2.5 px-3.5 flex gap-3.5 items-start"
                 >
-                  <span
-                    style={{
-                      fontSize: 14,
-                      fontWeight: 700,
-                      color: "#4080c8",
-                      fontFamily: "'Rajdhani', sans-serif",
-                      whiteSpace: "nowrap",
-                    }}
-                  >
+                  <span className="text-sm font-bold text-[#4080c8] font-['Rajdhani'] whitespace-nowrap">
                     ⏱ {t.item}
                   </span>
                   {t.explanation && (
-                    <span
-                      style={{
-                        fontSize: 13,
-                        color: "#8090b0",
-                        lineHeight: 1.5,
-                      }}
-                    >
+                    <span className="text-[13px] text-[#8090b0] leading-relaxed">
                       {t.explanation}
                     </span>
                   )}
@@ -384,17 +278,8 @@ export default function SummaryModal({
           )}
         </Section>
 
-        <div
-          style={{
-            background: "#0a1220",
-            border: "1px solid #1e3050",
-            borderRadius: 10,
-            padding: "12px 16px",
-            display: "flex",
-            gap: 24,
-            flexWrap: "wrap",
-          }}
-        >
+        {/* Summary Footer Stats */}
+        <div className="bg-[#0a1220] border border-[#1e3050] rounded-xl py-3 px-4 flex gap-6 flex-wrap justify-around sm:justify-start">
           {(
             [
               { label: "Bans", count: plan.bans.length, color: "#c84040" },
@@ -411,25 +296,14 @@ export default function SummaryModal({
               },
             ] as const
           ).map((s) => (
-            <div key={s.label} style={{ textAlign: "center" }}>
+            <div key={s.label} className="text-center min-w-[60px]">
               <div
-                style={{
-                  fontSize: 22,
-                  fontWeight: 800,
-                  color: s.color,
-                  fontFamily: "'Rajdhani', sans-serif",
-                }}
+                className="text-[22px] font-extrabold font-['Rajdhani']"
+                style={{ color: s.color }}
               >
                 {s.count}
               </div>
-              <div
-                style={{
-                  fontSize: 11,
-                  color: "#4a6080",
-                  textTransform: "uppercase",
-                  letterSpacing: 1,
-                }}
-              >
+              <div className="text-[11px] text-[#4a6080] uppercase tracking-wider">
                 {s.label}
               </div>
             </div>

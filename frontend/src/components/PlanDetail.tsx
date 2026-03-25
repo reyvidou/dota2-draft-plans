@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { CSSProperties, JSX } from "react";
+import type { JSX } from "react";
 import { useDraftStore, uid } from "../stores/store";
 import type {
   DraftPlan,
@@ -24,20 +24,23 @@ import HeroBrowser from "./HeroBrowser";
 import SummaryModal from "./SummaryModal";
 import { useNavigate, useParams } from "react-router-dom";
 
-export default function PlanDetail() {
+export default function PlanDetail(): JSX.Element {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { plans, heroes, updatePlan } = useDraftStore();
 
-  // Find the plan based on the URL parameter
   const plan = plans.find((p) => p.id === id);
 
-  // If the user types a bad URL like /plan/does-not-exist
   if (!plan) {
     return (
-      <div style={{ padding: 40, textAlign: "center", color: "#c8d8f0" }}>
+      <div className="p-10 text-center text-[#c8d8f0]">
         <h2>Draft Plan not found.</h2>
-        <button onClick={() => navigate("/")}>Go Back to List</button>
+        <button
+          onClick={() => navigate("/")}
+          className="px-4 py-2 mt-4 bg-[#1e3050] text-white rounded hover:bg-[#2a4060] transition-colors"
+        >
+          Go Back to List
+        </button>
       </div>
     );
   }
@@ -111,11 +114,8 @@ export default function PlanDetail() {
     const threatIds = plan.threats.map((t) => t.heroId);
 
     if (tab === "bans") return [...banIds, ...pickIds];
-
     if (tab === "picks") return [...pickIds, ...banIds];
-
     if (tab === "threats") return threatIds;
-
     return [];
   };
 
@@ -159,12 +159,14 @@ export default function PlanDetail() {
     },
   ];
 
-  const accentColors: Record<TabKey, string> = {
-    bans: "#c84040",
-    picks: "#44cc88",
-    threats: "#ffaa00",
-    timings: "#4080c8",
+  // Map tabs to their specific Tailwind button classes
+  const tabButtonClasses: Record<TabKey, string> = {
+    bans: "bg-[#c84040] text-white hover:bg-[#a03030]",
+    picks: "bg-[#44cc88] text-[#060d18] hover:bg-[#32a86d]",
+    threats: "bg-[#ffaa00] text-[#060d18] hover:bg-[#cc8800]",
+    timings: "bg-[#4080c8] text-white hover:bg-[#3060a0]",
   };
+
   const addLabels: Record<TabKey, string> = {
     bans: "Add Hero",
     picks: "Add Hero",
@@ -172,134 +174,52 @@ export default function PlanDetail() {
     timings: "Add Timing",
   };
 
-  const rowStyle: CSSProperties = {
-    background: "#0a1220",
-    border: "1px solid #1e3050",
-    borderRadius: 10,
-    padding: "14px 16px",
-    display: "flex",
-    alignItems: "flex-start",
-    gap: 14,
-  };
+  // Shared row styling extracted to a constant
+  const rowClasses =
+    "bg-[#0a1220] border border-[#1e3050] rounded-xl p-3.5 flex items-start gap-3.5 transition-colors hover:border-[#2a4060]";
 
   return (
-    <div
-      style={{ minHeight: "100vh", background: "#060d18", color: "#c8d8f0" }}
-    >
+    <div className="min-h-screen bg-[#060d18] text-[#c8d8f0]">
       {/* Header */}
-      <div
-        style={{
-          background: "linear-gradient(180deg, #0a1628 0%, #060d18 100%)",
-          borderBottom: "1px solid #1e3050",
-          padding: "20px 32px",
-          display: "flex",
-          alignItems: "center",
-          gap: 16,
-        }}
-      >
+      <div className="bg-gradient-to-b from-[#0a1628] to-[#060d18] border-b border-[#1e3050] py-5 px-8 flex items-center gap-4">
         <button
           onClick={() => navigate("/")}
-          style={{
-            background: "none",
-            border: "1px solid #1e3050",
-            borderRadius: 8,
-            color: "#4a6080",
-            cursor: "pointer",
-            padding: "8px 12px",
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-          }}
+          className="bg-transparent border border-[#1e3050] rounded-lg text-[#4a6080] cursor-pointer py-2 px-3 flex items-center gap-1.5 hover:bg-[#1e3050] hover:text-white transition-colors"
         >
           <Icon name="back" size={16} />
         </button>
-        <div style={{ flex: 1 }}>
-          <h1
-            style={{
-              margin: 0,
-              fontSize: 24,
-              fontWeight: 800,
-              color: "#e0eeff",
-              fontFamily: "'Rajdhani', sans-serif",
-              letterSpacing: 1,
-            }}
-          >
+        <div className="flex-1">
+          <h1 className="m-0 text-2xl font-extrabold text-[#e0eeff] font-['Rajdhani'] tracking-wider">
             {plan.name}
           </h1>
           {plan.desc && (
-            <p style={{ margin: 0, fontSize: 13, color: "#4a6080" }}>
-              {plan.desc}
-            </p>
+            <p className="m-0 text-[13px] text-[#4a6080]">{plan.desc}</p>
           )}
         </div>
         <button
           onClick={() => setShowSummary(true)}
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            padding: "10px 18px",
-            background: "#1e3050",
-            border: "1px solid #2a4060",
-            borderRadius: 8,
-            color: "#c8d8f0",
-            cursor: "pointer",
-            fontSize: 13,
-            fontWeight: 700,
-            fontFamily: "'Rajdhani', sans-serif",
-            letterSpacing: 1,
-          }}
+          className="flex items-center gap-2 py-2.5 px-4.5 bg-[#1e3050] border border-[#2a4060] rounded-lg text-[#c8d8f0] cursor-pointer text-[13px] font-bold font-['Rajdhani'] tracking-wider hover:bg-[#2a4060] hover:text-white transition-colors"
         >
           <Icon name="chart" size={16} /> Summary
         </button>
       </div>
 
       {/* Tabs */}
-      <div
-        style={{
-          display: "flex",
-          borderBottom: "1px solid #1e3050",
-          padding: "0 32px",
-          background: "#0a1220",
-        }}
-      >
+      <div className="flex border-b border-[#1e3050] px-8 bg-[#0a1220] overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            style={{
-              padding: "14px 20px",
-              background: "none",
-              border: "none",
-              borderBottom:
-                activeTab === tab.key
-                  ? "2px solid #c84040"
-                  : "2px solid transparent",
-              color: activeTab === tab.key ? "#e0eeff" : "#4a6080",
-              cursor: "pointer",
-              fontSize: 13,
-              fontWeight: 700,
-              fontFamily: "'Rajdhani', sans-serif",
-              letterSpacing: 1,
-              textTransform: "uppercase",
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-            }}
+            className={`py-3.5 px-5 bg-transparent border-none border-b-2 cursor-pointer text-[13px] font-bold font-['Rajdhani'] tracking-wider uppercase flex items-center gap-2 transition-colors whitespace-nowrap ${
+              activeTab === tab.key
+                ? "border-[#c84040] text-[#e0eeff]"
+                : "border-transparent text-[#4a6080] hover:text-[#c8d8f0]"
+            }`}
           >
             <Icon name={tab.icon} size={14} />
             {tab.label}
             {tab.count > 0 && (
-              <span
-                style={{
-                  background: "#c84040",
-                  color: "#fff",
-                  borderRadius: 10,
-                  fontSize: 11,
-                  padding: "1px 6px",
-                  fontWeight: 700,
-                }}
-              >
+              <span className="bg-[#c84040] text-white rounded-full text-[11px] px-1.5 py-px font-bold">
                 {tab.count}
               </span>
             )}
@@ -307,18 +227,11 @@ export default function PlanDetail() {
         ))}
       </div>
 
-      <div style={{ padding: "28px 32px" }}>
-        {/* Section header shared */}
+      <div className="py-7 px-8">
+        {/* Shared Section Header */}
         {activeTab !== "timings" && (
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-              marginBottom: 20,
-            }}
-          >
-            <p style={{ margin: 0, fontSize: 13, color: "#4a6080" }}>
+          <div className="flex justify-between items-center mb-5">
+            <p className="m-0 text-[13px] text-[#4a6080]">
               {activeTab === "bans" && "Heroes you want to ban in the draft."}
               {activeTab === "picks" &&
                 "Heroes you prefer to pick. Set role, priority, and notes."}
@@ -330,22 +243,7 @@ export default function PlanDetail() {
                 setBrowserTarget(activeTab);
                 setShowBrowser(true);
               }}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-                padding: "10px 18px",
-                background: accentColors[activeTab],
-                border: "none",
-                borderRadius: 8,
-                color:
-                  activeTab === "picks" || activeTab === "threats"
-                    ? "#060d18"
-                    : "#fff",
-                cursor: "pointer",
-                fontSize: 13,
-                fontWeight: 700,
-              }}
+              className={`flex items-center gap-2 py-2.5 px-4.5 border-none rounded-lg cursor-pointer text-[13px] font-bold transition-colors ${tabButtonClasses[activeTab]}`}
             >
               <Icon name="plus" size={14} /> {addLabels[activeTab]}
             </button>
@@ -354,7 +252,7 @@ export default function PlanDetail() {
 
         {/* BAN LIST */}
         {activeTab === "bans" && (
-          <div style={{ display: "grid", gap: 10 }}>
+          <div className="grid gap-2.5">
             {plan.bans.length === 0 && (
               <EmptyState
                 icon="ban"
@@ -363,17 +261,9 @@ export default function PlanDetail() {
               />
             )}
             {plan.bans.map((item) => (
-              <div key={item.id} style={rowStyle}>
-                <div
-                  style={{
-                    width: 4,
-                    alignSelf: "stretch",
-                    background: "#c84040",
-                    borderRadius: 2,
-                    flexShrink: 0,
-                  }}
-                />
-                <div style={{ flex: 1, minWidth: 0 }}>
+              <div key={item.id} className={rowClasses}>
+                <div className="w-1 self-stretch bg-[#c84040] rounded-sm shrink-0" />
+                <div className="flex-1 min-w-0">
                   <HeroBadge hero={heroMap[item.heroId]} size="md" />
                   <NoteEditor
                     value={item.note}
@@ -385,20 +275,7 @@ export default function PlanDetail() {
                   onClick={() =>
                     patch({ bans: plan.bans.filter((b) => b.id !== item.id) })
                   }
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#2a3a52",
-                    cursor: "pointer",
-                    padding: 4,
-                    display: "flex",
-                  }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = "#c84040")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.color = "#2a3a52")
-                  }
+                  className="bg-transparent border-none text-[#2a3a52] cursor-pointer p-1 flex hover:text-[#c84040] transition-colors"
                 >
                   <Icon name="trash" size={16} />
                 </button>
@@ -409,7 +286,7 @@ export default function PlanDetail() {
 
         {/* PREFERRED PICKS */}
         {activeTab === "picks" && (
-          <div style={{ display: "grid", gap: 10 }}>
+          <div className="grid gap-2.5">
             {plan.picks.length === 0 && (
               <EmptyState
                 icon="star"
@@ -418,26 +295,16 @@ export default function PlanDetail() {
               />
             )}
             {plan.picks.map((item) => (
-              <div key={item.id} style={rowStyle}>
+              <div key={item.id} className={rowClasses}>
                 <div
+                  className="w-1 self-stretch rounded-sm shrink-0"
                   style={{
-                    width: 4,
-                    alignSelf: "stretch",
-                    background:
+                    backgroundColor:
                       PRIORITY_COLORS[item.priority as Priority] ?? "#44cc88",
-                    borderRadius: 2,
-                    flexShrink: 0,
                   }}
                 />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 10,
-                      flexWrap: "wrap",
-                    }}
-                  >
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2.5 flex-wrap">
                     <HeroBadge hero={heroMap[item.heroId]} size="md" />
                     <select
                       value={item.role}
@@ -446,15 +313,7 @@ export default function PlanDetail() {
                           role: e.target.value as Role | "",
                         })
                       }
-                      style={{
-                        background: "#0a1220",
-                        border: "1px solid #1e3050",
-                        borderRadius: 6,
-                        color: "#8090b0",
-                        fontSize: 12,
-                        padding: "4px 8px",
-                        outline: "none",
-                      }}
+                      className="bg-[#0a1220] border border-[#1e3050] rounded-md text-[#8090b0] text-xs py-1 px-2 outline-none focus:border-[#4a6080]"
                     >
                       <option value="">Role…</option>
                       {ROLES.map((r) => (
@@ -470,16 +329,11 @@ export default function PlanDetail() {
                           priority: e.target.value as Priority | "",
                         })
                       }
+                      className="bg-[#0a1220] border border-[#1e3050] rounded-md text-xs py-1 px-2 outline-none focus:border-[#4a6080]"
                       style={{
-                        background: "#0a1220",
-                        border: "1px solid #1e3050",
-                        borderRadius: 6,
                         color:
                           PRIORITY_COLORS[item.priority as Priority] ??
                           "#8090b0",
-                        fontSize: 12,
-                        padding: "4px 8px",
-                        outline: "none",
                       }}
                     >
                       <option value="">Priority…</option>
@@ -500,20 +354,7 @@ export default function PlanDetail() {
                   onClick={() =>
                     patch({ picks: plan.picks.filter((p) => p.id !== item.id) })
                   }
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#2a3a52",
-                    cursor: "pointer",
-                    padding: 4,
-                    display: "flex",
-                  }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = "#c84040")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.color = "#2a3a52")
-                  }
+                  className="bg-transparent border-none text-[#2a3a52] cursor-pointer p-1 flex hover:text-[#c84040] transition-colors"
                 >
                   <Icon name="trash" size={16} />
                 </button>
@@ -524,7 +365,7 @@ export default function PlanDetail() {
 
         {/* ENEMY THREATS */}
         {activeTab === "threats" && (
-          <div style={{ display: "grid", gap: 10 }}>
+          <div className="grid gap-2.5">
             {plan.threats.length === 0 && (
               <EmptyState
                 icon="sword"
@@ -533,17 +374,9 @@ export default function PlanDetail() {
               />
             )}
             {plan.threats.map((item) => (
-              <div key={item.id} style={rowStyle}>
-                <div
-                  style={{
-                    width: 4,
-                    alignSelf: "stretch",
-                    background: "#ffaa00",
-                    borderRadius: 2,
-                    flexShrink: 0,
-                  }}
-                />
-                <div style={{ flex: 1, minWidth: 0 }}>
+              <div key={item.id} className={rowClasses}>
+                <div className="w-1 self-stretch bg-[#ffaa00] rounded-sm shrink-0" />
+                <div className="flex-1 min-w-0">
                   <HeroBadge hero={heroMap[item.heroId]} size="md" />
                   <NoteEditor
                     value={item.note}
@@ -557,20 +390,7 @@ export default function PlanDetail() {
                       threats: plan.threats.filter((t) => t.id !== item.id),
                     })
                   }
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#2a3a52",
-                    cursor: "pointer",
-                    padding: 4,
-                    display: "flex",
-                  }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = "#c84040")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.color = "#2a3a52")
-                  }
+                  className="bg-transparent border-none text-[#2a3a52] cursor-pointer p-1 flex hover:text-[#c84040] transition-colors"
                 >
                   <Icon name="trash" size={16} />
                 </button>
@@ -582,131 +402,57 @@ export default function PlanDetail() {
         {/* ITEM TIMINGS */}
         {activeTab === "timings" && (
           <div>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 20,
-              }}
-            >
-              <p style={{ margin: 0, fontSize: 13, color: "#4a6080" }}>
+            <div className="flex justify-between items-center mb-5">
+              <p className="m-0 text-[13px] text-[#4a6080]">
                 Key item timing milestones for your draft strategy.
               </p>
               <button
                 onClick={() => setAddingTiming(true)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                  padding: "10px 18px",
-                  background: "#4080c8",
-                  border: "none",
-                  borderRadius: 8,
-                  color: "#fff",
-                  cursor: "pointer",
-                  fontSize: 13,
-                  fontWeight: 700,
-                }}
+                className="flex items-center gap-2 py-2.5 px-4.5 bg-[#4080c8] border-none rounded-lg text-white cursor-pointer text-[13px] font-bold hover:bg-[#326aa6] transition-colors"
               >
                 <Icon name="plus" size={14} /> Add Timing
               </button>
             </div>
+
             {addingTiming && (
-              <div
-                style={{
-                  background: "#0a1220",
-                  border: "1px solid #2a4060",
-                  borderRadius: 10,
-                  padding: 16,
-                  marginBottom: 16,
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 10,
-                    marginBottom: 10,
-                    flexWrap: "wrap",
-                  }}
-                >
+              <div className="bg-[#0a1220] border border-[#2a4060] rounded-xl p-4 mb-4 shadow-lg">
+                <div className="flex gap-2.5 mb-2.5 flex-wrap">
                   <input
                     autoFocus
                     value={timingItem}
                     onChange={(e) => setTimingItem(e.target.value)}
                     placeholder='e.g. "BKB ~18 min"'
-                    style={{
-                      flex: 1,
-                      minWidth: 160,
-                      padding: "9px 12px",
-                      background: "#060d18",
-                      border: "1px solid #1e3050",
-                      borderRadius: 8,
-                      color: "#c8d8f0",
-                      fontSize: 13,
-                      outline: "none",
-                    }}
+                    className="flex-1 min-w-[160px] py-2 px-3 bg-[#060d18] border border-[#1e3050] rounded-lg text-[#c8d8f0] text-[13px] outline-none focus:border-[#4a6080] transition-colors"
                   />
                   <input
                     value={timingNote}
                     onChange={(e) => setTimingNote(e.target.value)}
                     placeholder="Why this timing matters…"
-                    style={{
-                      flex: 2,
-                      minWidth: 200,
-                      padding: "9px 12px",
-                      background: "#060d18",
-                      border: "1px solid #1e3050",
-                      borderRadius: 8,
-                      color: "#c8d8f0",
-                      fontSize: 13,
-                      outline: "none",
-                    }}
+                    className="flex-[2] min-w-[200px] py-2 px-3 bg-[#060d18] border border-[#1e3050] rounded-lg text-[#c8d8f0] text-[13px] outline-none focus:border-[#4a6080] transition-colors"
+                    onKeyDown={(e) => e.key === "Enter" && addTiming()}
                   />
                 </div>
-                <div
-                  style={{
-                    display: "flex",
-                    gap: 8,
-                    justifyContent: "flex-end",
-                  }}
-                >
+                <div className="flex gap-2 justify-end">
                   <button
                     onClick={() => {
                       setAddingTiming(false);
                       setTimingItem("");
                       setTimingNote("");
                     }}
-                    style={{
-                      padding: "8px 14px",
-                      background: "none",
-                      border: "1px solid #1e3050",
-                      borderRadius: 8,
-                      color: "#4a6080",
-                      cursor: "pointer",
-                      fontSize: 13,
-                    }}
+                    className="py-2 px-3.5 bg-transparent border border-[#1e3050] rounded-lg text-[#4a6080] cursor-pointer text-[13px] hover:bg-[#1e3050] hover:text-white transition-colors"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={addTiming}
-                    style={{
-                      padding: "8px 14px",
-                      background: "#4080c8",
-                      border: "none",
-                      borderRadius: 8,
-                      color: "#fff",
-                      cursor: "pointer",
-                      fontSize: 13,
-                      fontWeight: 700,
-                    }}
+                    className="py-2 px-3.5 bg-[#4080c8] border-none rounded-lg text-white cursor-pointer text-[13px] font-bold hover:bg-[#326aa6] transition-colors"
                   >
                     Add
                   </button>
                 </div>
               </div>
             )}
+
             {plan.timings.length === 0 && !addingTiming && (
               <EmptyState
                 icon="clock"
@@ -714,27 +460,13 @@ export default function PlanDetail() {
                 sub="Track key item timings for your strategy"
               />
             )}
-            <div style={{ display: "grid", gap: 10 }}>
+
+            <div className="grid gap-2.5">
               {plan.timings.map((t) => (
-                <div key={t.id} style={rowStyle}>
-                  <div
-                    style={{
-                      width: 4,
-                      alignSelf: "stretch",
-                      background: "#4080c8",
-                      borderRadius: 2,
-                      flexShrink: 0,
-                    }}
-                  />
-                  <div style={{ flex: 1 }}>
-                    <div
-                      style={{
-                        fontSize: 15,
-                        fontWeight: 700,
-                        color: "#4080c8",
-                        fontFamily: "'Rajdhani', sans-serif",
-                      }}
-                    >
+                <div key={t.id} className={rowClasses}>
+                  <div className="w-1 self-stretch bg-[#4080c8] rounded-sm shrink-0" />
+                  <div className="flex-1">
+                    <div className="text-[15px] font-bold text-[#4080c8] font-['Rajdhani']">
                       {t.item}
                     </div>
                     <NoteEditor
@@ -749,20 +481,7 @@ export default function PlanDetail() {
                         timings: plan.timings.filter((x) => x.id !== t.id),
                       })
                     }
-                    style={{
-                      background: "none",
-                      border: "none",
-                      color: "#2a3a52",
-                      cursor: "pointer",
-                      padding: 4,
-                      display: "flex",
-                    }}
-                    onMouseEnter={(e) =>
-                      (e.currentTarget.style.color = "#c84040")
-                    }
-                    onMouseLeave={(e) =>
-                      (e.currentTarget.style.color = "#2a3a52")
-                    }
+                    className="bg-transparent border-none text-[#2a3a52] cursor-pointer p-1 flex hover:text-[#c84040] transition-colors"
                   >
                     <Icon name="trash" size={16} />
                   </button>
@@ -773,6 +492,7 @@ export default function PlanDetail() {
         )}
       </div>
 
+      {/* Modals */}
       {showBrowser && (
         <HeroBrowser
           heroes={heroes}

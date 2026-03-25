@@ -20,243 +20,119 @@ export default function PlanList(): JSX.Element {
   };
 
   return (
-    <div
-      style={{ minHeight: "100vh", background: "#060d18", color: "#c8d8f0" }}
-    >
-      <div
-        style={{
-          background: "linear-gradient(180deg, #0a1628 0%, #060d18 100%)",
-          borderBottom: "1px solid #1e3050",
-          padding: "28px 40px",
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 16,
-            marginBottom: 4,
-          }}
-        >
-          <div
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 10,
-              background: "#c84040",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
+    <div className="min-h-screen bg-[#060d18] text-[#c8d8f0]">
+      {/* Header Banner */}
+      <div className="bg-gradient-to-b from-[#0a1628] to-[#060d18] border-b border-[#1e3050] py-7 px-10">
+        <div className="flex items-center gap-4 mb-1">
+          <div className="w-10 h-10 rounded-lg bg-[#c84040] flex items-center justify-center shrink-0">
             <Icon name="shield" size={20} />
           </div>
           <div>
-            <h1
-              style={{
-                margin: 0,
-                fontSize: 28,
-                fontWeight: 800,
-                color: "#e0eeff",
-                fontFamily: "'Rajdhani', sans-serif",
-                letterSpacing: 2,
-                textTransform: "uppercase",
-              }}
-            >
+            <h1 className="m-0 text-[28px] font-extrabold text-[#e0eeff] font-['Rajdhani'] tracking-widest uppercase">
               Dota 2 Draft Planner
             </h1>
-            <p style={{ margin: 0, fontSize: 13, color: "#4a6080" }}>
+            <p className="m-0 text-[13px] text-[#4a6080]">
               {plans.length} draft plan{plans.length !== 1 ? "s" : ""} saved
             </p>
           </div>
         </div>
       </div>
 
-      <div style={{ padding: "32px 40px" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: 24,
-          }}
-        >
-          <h2
-            style={{
-              margin: 0,
-              fontSize: 16,
-              fontWeight: 700,
-              color: "#8090b0",
-              letterSpacing: 1,
-              textTransform: "uppercase",
-              fontFamily: "'Rajdhani', sans-serif",
-            }}
-          >
+      {/* Main Content Area */}
+      <div className="py-8 px-10">
+        {/* Section Header & Create Button */}
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="m-0 text-base font-bold text-[#8090b0] tracking-widest uppercase font-['Rajdhani']">
             Draft Plans
           </h2>
           <button
             onClick={() => setShowCreate(true)}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              padding: "10px 20px",
-              background: "#c84040",
-              border: "none",
-              borderRadius: 8,
-              color: "#fff",
-              cursor: "pointer",
-              fontSize: 14,
-              fontWeight: 700,
-              fontFamily: "'Rajdhani', sans-serif",
-              letterSpacing: 1,
-              textTransform: "uppercase",
-            }}
+            className="flex items-center gap-2 px-5 py-2.5 bg-[#c84040] border-none rounded-lg text-white cursor-pointer text-sm font-bold font-['Rajdhani'] tracking-wider uppercase hover:bg-[#a03030] transition-colors"
           >
             <Icon name="plus" size={16} /> New Plan
           </button>
         </div>
 
+        {/* Empty State */}
         {plans.length === 0 && (
-          <div
-            style={{
-              textAlign: "center",
-              padding: "80px 40px",
-              border: "1px dashed #1e3050",
-              borderRadius: 12,
-            }}
-          >
-            <div style={{ fontSize: 48, marginBottom: 16 }}>🛡️</div>
-            <p style={{ margin: 0, fontSize: 16, color: "#4a6080" }}>
-              No draft plans yet
-            </p>
-            <p style={{ margin: "8px 0 0", fontSize: 13, color: "#2a3a52" }}>
+          <div className="text-center py-20 px-10 border border-dashed border-[#1e3050] rounded-xl">
+            <div className="text-5xl mb-4">🛡️</div>
+            <p className="m-0 text-base text-[#4a6080]">No draft plans yet</p>
+            <p className="mt-2 mb-0 text-[13px] text-[#2a3a52]">
               Create your first draft plan to get started
             </p>
           </div>
         )}
 
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))",
-            gap: 16,
-          }}
-        >
+        {/* Plan Grid */}
+        <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4">
           {plans.map((plan) => (
             <div
               key={plan.id}
-              style={{
-                background: "#0a1220",
-                border: "1px solid #1e3050",
-                borderRadius: 12,
-                padding: 20,
-                cursor: "pointer",
-                transition: "border-color 0.15s, transform 0.1s",
-              }}
-              onMouseEnter={(e) => {
-                (e.currentTarget as HTMLDivElement).style.borderColor =
-                  "#c84040";
-                (e.currentTarget as HTMLDivElement).style.transform =
-                  "translateY(-2px)";
-              }}
-              onMouseLeave={(e) => {
-                (e.currentTarget as HTMLDivElement).style.borderColor =
-                  "#1e3050";
-                (e.currentTarget as HTMLDivElement).style.transform = "none";
-              }}
               onClick={() => navigate(`/plan/${plan.id}`)}
+              className="group bg-[#0a1220] border border-[#1e3050] rounded-xl p-5 cursor-pointer transition-all duration-150 ease-in-out hover:border-[#c84040] hover:-translate-y-0.5"
             >
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "flex-start",
-                }}
-              >
-                <div style={{ flex: 1 }}>
-                  <h3
-                    style={{
-                      margin: "0 0 4px",
-                      fontSize: 18,
-                      fontWeight: 700,
-                      color: "#e0eeff",
-                      fontFamily: "'Rajdhani', sans-serif",
-                    }}
-                  >
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <h3 className="m-0 mb-1 text-lg font-bold text-[#e0eeff] font-['Rajdhani'] group-hover:text-white transition-colors">
                     {plan.name}
                   </h3>
                   {plan.desc && (
-                    <p
-                      style={{
-                        margin: "0 0 12px",
-                        fontSize: 13,
-                        color: "#4a6080",
-                      }}
-                    >
+                    <p className="m-0 mb-3 text-[13px] text-[#4a6080] line-clamp-2">
                       {plan.desc}
                     </p>
                   )}
-                  <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+
+                  {/* Stats Badges */}
+                  <div className="flex gap-3 flex-wrap">
                     {(
                       [
                         {
                           label: "Bans",
                           count: plan.bans.length,
-                          color: "#c84040",
+                          colorClass: "text-[#c84040]",
                         },
                         {
                           label: "Picks",
                           count: plan.picks.length,
-                          color: "#44cc88",
+                          colorClass: "text-[#44cc88]",
                         },
                         {
                           label: "Threats",
                           count: plan.threats.length,
-                          color: "#ffaa00",
+                          colorClass: "text-[#ffaa00]",
                         },
                         {
                           label: "Items",
                           count: plan.timings.length,
-                          color: "#4080c8",
+                          colorClass: "text-[#4080c8]",
                         },
                       ] as const
-                    ).map(({ label, count, color }) => (
-                      <span
-                        key={label}
-                        style={{ fontSize: 12, color: "#4a6080" }}
-                      >
-                        <span style={{ color, fontWeight: 700 }}>{count}</span>{" "}
+                    ).map(({ label, count, colorClass }) => (
+                      <span key={label} className="text-xs text-[#4a6080]">
+                        <span className={`${colorClass} font-bold`}>
+                          {count}
+                        </span>{" "}
                         {label}
                       </span>
                     ))}
                   </div>
                 </div>
+
+                {/* Delete Button */}
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
                     deletePlan(plan.id);
                   }}
-                  style={{
-                    background: "none",
-                    border: "none",
-                    color: "#2a3a52",
-                    cursor: "pointer",
-                    padding: 4,
-                    display: "flex",
-                    flexShrink: 0,
-                  }}
-                  onMouseEnter={(e) =>
-                    (e.currentTarget.style.color = "#c84040")
-                  }
-                  onMouseLeave={(e) =>
-                    (e.currentTarget.style.color = "#2a3a52")
-                  }
+                  className="bg-transparent border-none text-[#2a3a52] cursor-pointer p-1 flex shrink-0 hover:text-[#c84040] transition-colors"
+                  aria-label="Delete Plan"
                 >
                   <Icon name="trash" size={16} />
                 </button>
               </div>
-              <div style={{ marginTop: 14, fontSize: 12, color: "#2a3a52" }}>
+
+              <div className="mt-3.5 text-xs text-[#2a3a52]">
                 Created {new Date(plan.createdAt).toLocaleDateString()}
               </div>
             </div>
@@ -264,20 +140,12 @@ export default function PlanList(): JSX.Element {
         </div>
       </div>
 
+      {/* Create Modal */}
       {showCreate && (
         <Modal onClose={() => setShowCreate(false)} title="New Draft Plan">
-          <div style={{ padding: 24 }}>
-            <div style={{ marginBottom: 16 }}>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: 12,
-                  color: "#4a6080",
-                  marginBottom: 6,
-                  textTransform: "uppercase",
-                  letterSpacing: 1,
-                }}
-              >
+          <div className="p-6">
+            <div className="mb-4">
+              <label className="block text-xs text-[#4a6080] mb-1.5 uppercase tracking-wider">
                 Plan Name *
               </label>
               <input
@@ -286,30 +154,11 @@ export default function PlanList(): JSX.Element {
                 onChange={(e) => setName(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleCreate()}
                 placeholder="e.g. Patch 7.38 Aggressive Draft"
-                style={{
-                  width: "100%",
-                  boxSizing: "border-box",
-                  padding: "10px 14px",
-                  background: "#0a1220",
-                  border: "1px solid #2a4060",
-                  borderRadius: 8,
-                  color: "#c8d8f0",
-                  fontSize: 14,
-                  outline: "none",
-                }}
+                className="w-full box-border px-3.5 py-2.5 bg-[#0a1220] border border-[#2a4060] rounded-lg text-[#c8d8f0] text-sm outline-none focus:border-[#4a6080] transition-colors"
               />
             </div>
-            <div style={{ marginBottom: 24 }}>
-              <label
-                style={{
-                  display: "block",
-                  fontSize: 12,
-                  color: "#4a6080",
-                  marginBottom: 6,
-                  textTransform: "uppercase",
-                  letterSpacing: 1,
-                }}
-              >
+            <div className="mb-6">
+              <label className="block text-xs text-[#4a6080] mb-1.5 uppercase tracking-wider">
                 Description (optional)
               </label>
               <textarea
@@ -317,50 +166,24 @@ export default function PlanList(): JSX.Element {
                 onChange={(e) => setDesc(e.target.value)}
                 placeholder="Brief description of the strategy…"
                 rows={3}
-                style={{
-                  width: "100%",
-                  boxSizing: "border-box",
-                  padding: "10px 14px",
-                  background: "#0a1220",
-                  border: "1px solid #2a4060",
-                  borderRadius: 8,
-                  color: "#c8d8f0",
-                  fontSize: 14,
-                  outline: "none",
-                  resize: "vertical",
-                }}
+                className="w-full box-border px-3.5 py-2.5 bg-[#0a1220] border border-[#2a4060] rounded-lg text-[#c8d8f0] text-sm outline-none resize-y focus:border-[#4a6080] transition-colors"
               />
             </div>
-            <div
-              style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}
-            >
+            <div className="flex gap-2.5 justify-end">
               <button
                 onClick={() => setShowCreate(false)}
-                style={{
-                  padding: "10px 20px",
-                  background: "none",
-                  border: "1px solid #1e3050",
-                  borderRadius: 8,
-                  color: "#4a6080",
-                  cursor: "pointer",
-                  fontSize: 14,
-                }}
+                className="px-5 py-2.5 bg-transparent border border-[#1e3050] rounded-lg text-[#4a6080] cursor-pointer text-sm hover:bg-[#1e3050] hover:text-white transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleCreate}
                 disabled={!name.trim()}
-                style={{
-                  padding: "10px 20px",
-                  background: name.trim() ? "#c84040" : "#1e3050",
-                  border: "none",
-                  borderRadius: 8,
-                  color: name.trim() ? "#fff" : "#4a6080",
-                  cursor: name.trim() ? "pointer" : "not-allowed",
-                  fontSize: 14,
-                  fontWeight: 700,
-                }}
+                className={`px-5 py-2.5 border-none rounded-lg text-sm font-bold transition-colors ${
+                  name.trim()
+                    ? "bg-[#c84040] text-white cursor-pointer hover:bg-[#a03030]"
+                    : "bg-[#1e3050] text-[#4a6080] cursor-not-allowed"
+                }`}
               >
                 Create Plan
               </button>

@@ -26,16 +26,7 @@ export default function App(): JSX.Element {
 
   if (loadingPlans) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "#060d18",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#4a6080",
-        }}
-      >
+      <div className="min-h-screen bg-[#060d18] flex items-center justify-center text-[#4a6080]">
         Loading Workspace...
       </div>
     );
@@ -44,40 +35,15 @@ export default function App(): JSX.Element {
   const displayError = apiError || heroApiError;
   if (displayError && heroes.length === 0) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          background: "#060d18",
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          color: "#c8d8f0",
-          gap: 16,
-        }}
-      >
-        <div style={{ fontSize: 48 }}>🔌</div>
-        <h2
-          style={{
-            margin: 0,
-            fontFamily: "'Rajdhani', sans-serif",
-            color: "#c84040",
-          }}
-        >
+      <div className="min-h-screen bg-[#060d18] flex flex-col items-center justify-center text-[#c8d8f0] gap-4">
+        <div className="text-5xl">🔌</div>
+        <h2 className="m-0 font-['Rajdhani'] text-[#c84040]">
           Connection Error
         </h2>
-        <p style={{ color: "#4a6080" }}>{displayError}</p>
+        <p className="text-[#4a6080]">{displayError}</p>
         <button
           onClick={() => window.location.reload()}
-          style={{
-            padding: "10px 20px",
-            background: "#1e3050",
-            color: "#fff",
-            border: "none",
-            borderRadius: 8,
-            cursor: "pointer",
-            fontWeight: 700,
-          }}
+          className="px-5 py-2.5 bg-[#1e3050] text-white border-none rounded-lg cursor-pointer font-bold hover:bg-[#2a4060] transition-colors"
         >
           Retry Connection
         </button>
@@ -87,25 +53,14 @@ export default function App(): JSX.Element {
 
   return (
     <>
+      {/* Background Hero Loading Toast */}
       {loadingHeroes && (
-        <div
-          style={{
-            position: "fixed",
-            top: 16,
-            right: 16,
-            background: "#0a1220",
-            border: "1px solid #1e3050",
-            borderRadius: 8,
-            padding: "8px 14px",
-            fontSize: 12,
-            color: "#4a6080",
-            zIndex: 999,
-          }}
-        >
+        <div className="fixed top-4 right-4 bg-[#0a1220] border border-[#1e3050] rounded-lg py-2 px-3.5 text-xs text-[#4a6080] z-[999] shadow-lg">
           Loading heroes from Database Cache...
         </div>
       )}
 
+      {/* Routes */}
       <Routes>
         <Route path="/" element={<PlanList />} />
         <Route path="/plan/:id" element={<PlanDetail />} />

@@ -18,6 +18,7 @@ export type IconName =
   | "shield"
   | "check"
   | "eye";
+
 interface IconProps {
   name: IconName;
   size?: number;
@@ -203,9 +204,11 @@ export const Icon = ({ name, size = 16 }: IconProps): JSX.Element | null => {
       </svg>
     ),
   } as any;
+
   return icons[name] ?? null;
 };
 
+// ─── HeroBadge ───
 export function HeroBadge({
   hero,
   size = "sm",
@@ -214,51 +217,35 @@ export function HeroBadge({
   size?: HeroSize;
 }): JSX.Element {
   const [imgOk, setImgOk] = useState(true);
-  const px = size === "lg" ? 56 : size === "md" ? 40 : 28;
+
+  const sizeClasses = {
+    xs: "w-7 h-4",
+    sm: "w-7 h-4",
+    md: "w-10 h-[22px]",
+    lg: "w-14 h-[31px]",
+  };
+
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+    <div className="flex items-center gap-2">
       <div
-        style={{
-          width: px,
-          height: px * 0.56,
-          borderRadius: 4,
-          overflow: "hidden",
-          background: "#1a2332",
-          flexShrink: 0,
-          border: "1px solid #2a3a52",
-        }}
+        className={`${sizeClasses[size]} rounded overflow-hidden bg-[#1a2332] shrink-0 border border-[#2a3a52]`}
       >
         {imgOk && hero?.name ? (
           <img
             src={HERO_IMG(hero.name.replace("npc_dota_hero_", ""))}
             alt={hero.localized_name}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            className="w-full h-full object-cover"
             onError={() => setImgOk(false)}
           />
         ) : (
-          <div
-            style={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: 10,
-              color: "#4a6080",
-              fontWeight: 700,
-            }}
-          >
+          <div className="w-full h-full flex items-center justify-center text-[10px] text-[#4a6080] font-bold">
             {hero?.localized_name?.slice(0, 2).toUpperCase()}
           </div>
         )}
       </div>
       {size !== "xs" && (
         <span
-          style={{
-            fontSize: size === "lg" ? 14 : 12,
-            color: "#c8d8f0",
-            fontWeight: 600,
-          }}
+          className={`text-[#c8d8f0] font-semibold ${size === "lg" ? "text-sm" : "text-xs"}`}
         >
           {hero?.localized_name}
         </span>
@@ -267,6 +254,7 @@ export function HeroBadge({
   );
 }
 
+// ─── Modal ───
 export function Modal({
   onClose,
   children,
@@ -288,76 +276,31 @@ export function Modal({
 
   return (
     <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,8,20,0.88)",
-        zIndex: 1000,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: 16,
-        backdropFilter: "blur(6px)",
-      }}
+      className="fixed inset-0 bg-[#000814]/90 z-[1000] flex items-center justify-center p-4 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        style={{
-          background: "#0d1a2d",
-          border: "1px solid #1e3050",
-          borderRadius: 12,
-          width: "100%",
-          maxWidth: wide ? 960 : 560,
-          maxHeight: "92vh",
-          overflow: "hidden",
-          display: "flex",
-          flexDirection: "column",
-          boxShadow: "0 24px 80px rgba(0,0,0,0.8)",
-        }}
+        className={`bg-[#0d1a2d] border border-[#1e3050] rounded-xl w-full ${wide ? "max-w-5xl" : "max-w-xl"} max-h-[92vh] overflow-hidden flex flex-col shadow-[0_24px_80px_rgba(0,0,0,0.8)]`}
         onClick={(e) => e.stopPropagation()}
       >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            padding: "20px 24px",
-            borderBottom: "1px solid #1e3050",
-            flexShrink: 0,
-          }}
-        >
-          <h2
-            style={{
-              margin: 0,
-              fontSize: 18,
-              fontWeight: 700,
-              color: "#e0eeff",
-              fontFamily: "'Rajdhani', sans-serif",
-              letterSpacing: 1,
-            }}
-          >
+        <div className="flex items-center justify-between py-5 px-6 border-b border-[#1e3050] shrink-0">
+          <h2 className="m-0 text-lg font-bold text-[#e0eeff] font-['Rajdhani'] tracking-wide">
             {title}
           </h2>
           <button
             onClick={onClose}
-            style={{
-              background: "none",
-              border: "none",
-              color: "#4a6080",
-              cursor: "pointer",
-              padding: 4,
-              display: "flex",
-            }}
+            className="bg-transparent border-none text-[#4a6080] cursor-pointer p-1 flex hover:text-white transition-colors"
           >
             <Icon name="close" size={20} />
           </button>
         </div>
-        <div style={{ overflowY: "auto", flex: 1 }}>{children}</div>
+        <div className="overflow-y-auto flex-1">{children}</div>
       </div>
     </div>
   );
 }
 
+// ─── NoteEditor ───
 export function NoteEditor({
   value,
   onChange,
@@ -372,32 +315,18 @@ export function NoteEditor({
 
   if (!editing) {
     return (
-      <div
-        style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}
-      >
+      <div className="flex items-center gap-2 mt-1">
         {value ? (
-          <span style={{ fontSize: 12, color: "#6080a0", fontStyle: "italic" }}>
-            {value}
-          </span>
+          <span className="text-xs text-[#6080a0] italic">{value}</span>
         ) : (
-          <span style={{ fontSize: 12, color: "#2a3a52", fontStyle: "italic" }}>
-            {placeholder}
-          </span>
+          <span className="text-xs text-[#2a3a52] italic">{placeholder}</span>
         )}
         <button
           onClick={() => {
             setDraft(value);
             setEditing(true);
           }}
-          style={{
-            background: "none",
-            border: "none",
-            color: "#4a6080",
-            cursor: "pointer",
-            padding: 2,
-            opacity: 0.6,
-            display: "flex",
-          }}
+          className="bg-transparent border-none text-[#4a6080] cursor-pointer p-0.5 opacity-60 flex hover:opacity-100 transition-opacity"
         >
           <Icon name="edit" size={12} />
         </button>
@@ -406,7 +335,7 @@ export function NoteEditor({
   }
 
   return (
-    <div style={{ display: "flex", gap: 6, marginTop: 4 }}>
+    <div className="flex gap-1.5 mt-1">
       <input
         autoFocus
         value={draft}
@@ -419,31 +348,14 @@ export function NoteEditor({
           if (e.key === "Escape") setEditing(false);
         }}
         placeholder={placeholder}
-        style={{
-          flex: 1,
-          background: "#0a1220",
-          border: "1px solid #2a4060",
-          borderRadius: 6,
-          padding: "4px 8px",
-          color: "#c8d8f0",
-          fontSize: 12,
-          outline: "none",
-        }}
+        className="flex-1 bg-[#0a1220] border border-[#2a4060] rounded-md px-2 py-1 text-[#c8d8f0] text-xs outline-none focus:border-[#4a6080] transition-colors"
       />
       <button
         onClick={() => {
           onChange(draft);
           setEditing(false);
         }}
-        style={{
-          background: "#1e5040",
-          border: "none",
-          borderRadius: 6,
-          color: "#44cc88",
-          cursor: "pointer",
-          padding: "4px 8px",
-          display: "flex",
-        }}
+        className="bg-[#1e5040] border-none rounded-md text-[#44cc88] cursor-pointer px-2 py-1 flex hover:bg-[#1e6040] transition-colors"
       >
         <Icon name="check" size={14} />
       </button>
@@ -451,6 +363,7 @@ export function NoteEditor({
   );
 }
 
+// ─── EmptyState ───
 export function EmptyState({
   icon,
   text,
@@ -461,21 +374,12 @@ export function EmptyState({
   sub: string;
 }): JSX.Element {
   return (
-    <div
-      style={{
-        textAlign: "center",
-        padding: "60px 40px",
-        border: "1px dashed #1e3050",
-        borderRadius: 12,
-      }}
-    >
-      <div style={{ marginBottom: 12, color: "#2a3a52" }}>
+    <div className="text-center py-[60px] px-10 border border-dashed border-[#1e3050] rounded-xl flex flex-col items-center">
+      <div className="mb-3 text-[#2a3a52]">
         <Icon name={icon} size={32} />
       </div>
-      <p style={{ margin: "0 0 4px", fontSize: 15, color: "#4a6080" }}>
-        {text}
-      </p>
-      <p style={{ margin: 0, fontSize: 13, color: "#2a3a52" }}>{sub}</p>
+      <p className="m-0 mb-1 text-[15px] text-[#4a6080]">{text}</p>
+      <p className="m-0 text-[13px] text-[#2a3a52]">{sub}</p>
     </div>
   );
 }
