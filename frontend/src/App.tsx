@@ -1,15 +1,18 @@
 import { useEffect } from "react";
 import type { JSX } from "react";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { useDraftStore } from "./stores/store";
+import { useFetchHeroes } from "./hooks/useFetchHeroes";
 import PlanList from "./components/PlanList";
 import PlanDetail from "./components/PlanDetail";
-import { useFetchHeroes } from "./hooks/useFetchHeroes";
-import { Navigate, Route, Routes } from "react-router-dom";
 
 export default function App(): JSX.Element {
-  const { plans, hydrated, setHydrated, heroes } = useDraftStore();
+  const { fetchPlans, loadingPlans, heroes, apiError } = useDraftStore();
+  const { loadingHeroes, apiError: heroApiError } = useFetchHeroes();
 
-  const { loadingHeroes, apiError } = useFetchHeroes();
+  useEffect(() => {
+    fetchPlans();
+  }, [fetchPlans]);
 
   useEffect(() => {
     if (document.getElementById("dota-fonts")) return;
@@ -21,14 +24,7 @@ export default function App(): JSX.Element {
     document.head.appendChild(link);
   }, []);
 
-  useEffect(() => {
-    const t = setTimeout(() => {
-      if (!hydrated) setHydrated(true);
-    }, 1500);
-    return () => clearTimeout(t);
-  }, [hydrated, setHydrated]);
-
-  if (!hydrated) {
+  if (loadingPlans) {
     return (
       <div
         style={{
@@ -40,12 +36,13 @@ export default function App(): JSX.Element {
           color: "#4a6080",
         }}
       >
-        Loading Workspace…
+        Loading Workspace...
       </div>
     );
   }
 
-  if (apiError && heroes.length === 0) {
+  const displayError = apiError || heroApiError;
+  if (displayError && heroes.length === 0) {
     return (
       <div
         style={{
@@ -69,7 +66,7 @@ export default function App(): JSX.Element {
         >
           Connection Error
         </h2>
-        <p style={{ color: "#4a6080" }}>{apiError}</p>
+        <p style={{ color: "#4a6080" }}>{displayError}</p>
         <button
           onClick={() => window.location.reload()}
           style={{
@@ -105,14 +102,13 @@ export default function App(): JSX.Element {
             zIndex: 999,
           }}
         >
-          Loading heroes from OpenDota…
+          Loading heroes from Database Cache...
         </div>
       )}
 
       <Routes>
         <Route path="/" element={<PlanList />} />
         <Route path="/plan/:id" element={<PlanDetail />} />
-        {/* Catch-all route to redirect bad URLs back to home */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </>

@@ -49,7 +49,7 @@ export interface DraftPlan {
   id: string;
   name: string;
   desc: string;
-  createdAt: number;
+  createdAt: number | string;
   bans: BanEntry[];
   picks: PickEntry[];
   threats: ThreatEntry[];

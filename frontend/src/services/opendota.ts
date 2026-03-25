@@ -1,13 +1,14 @@
 import type { OpenDotaHero } from "../types/types";
-import { OPENDOTA_HEROES } from "../constants/constants";
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export async function fetchHeroes(): Promise<OpenDotaHero[]> {
   try {
-    const response = await fetch(OPENDOTA_HEROES);
+    const response = await fetch(`${API_BASE_URL}/api/heroes`);
 
     if (!response.ok) {
       throw new Error(
-        `OpenDota API error: ${response.status} ${response.statusText}`,
+        `Backend API error: ${response.status} ${response.statusText}`,
       );
     }
 

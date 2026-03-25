@@ -1,46 +1,63 @@
 import { create } from "zustand";
-import type { StateCreator } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
-import type { PersistOptions } from "zustand/middleware";
 import type { DraftPlan, OpenDotaHero } from "../types/types";
+
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 export interface DraftStore {
   plans: DraftPlan[];
   heroes: OpenDotaHero[];
   loadingHeroes: boolean;
-  hydrated: boolean;
+  loadingPlans: boolean;
   apiError: string | null;
 
-  createPlan: (name: string, desc: string, id: string) => void;
-  deletePlan: (id: string) => void;
-  updatePlan: (plan: DraftPlan) => void;
+  fetchPlans: () => Promise<void>;
+  createPlan: (name: string, desc: string, id: string) => Promise<void>;
+  deletePlan: (id: string) => Promise<void>;
+  updatePlan: (plan: DraftPlan) => Promise<void>;
+
   setHeroes: (heroes: OpenDotaHero[]) => void;
   setLoadingHeroes: (v: boolean) => void;
-  setHydrated: (v: boolean) => void;
   setApiError: (err: string | null) => void;
 }
 
-export const uid = (): string => Math.random().toString(36).slice(2, 10);
+export const uid = (): string => crypto.randomUUID();
 
-type PersistedSlice = Pick<DraftStore, "plans">;
-
-const persistConfig: PersistOptions<DraftStore, PersistedSlice> = {
-  name: "dota2_draft_plans_v2",
-  storage: createJSONStorage(() => localStorage),
-  partialize: (state) => ({ plans: state.plans }),
-  onRehydrateStorage: () => (state) => {
-    if (state) state.setHydrated(true);
-  },
-};
-
-const storeSlice: StateCreator<DraftStore> = (set) => ({
+export const useDraftStore = create<DraftStore>((set, get) => ({
   plans: [],
   heroes: [],
   loadingHeroes: true,
-  hydrated: false,
+  loadingPlans: true,
   apiError: null,
 
-  createPlan: (name: string, desc: string, id: string) => {
+  fetchPlans: async () => {
+    set({ loadingPlans: true });
+    try {
+      const res = await fetch(`${API_BASE}/api/plans`);
+      if (!res.ok) throw new Error("Failed to fetch plans");
+
+      const rawData = await res.json();
+
+      const mappedPlans: DraftPlan[] = rawData.map((dbRow: any) => ({
+        id: dbRow.id,
+        name: dbRow.name,
+        desc: dbRow.description,
+        createdAt: dbRow.created_at,
+        bans: dbRow.bans || [],
+        picks: dbRow.picks || [],
+        threats: dbRow.threats || [],
+        timings: dbRow.timings || [],
+      }));
+
+      set({ plans: mappedPlans, loadingPlans: false, apiError: null });
+    } catch (err) {
+      set({
+        apiError: "Failed to load draft plans from database.",
+        loadingPlans: false,
+      });
+    }
+  },
+
+  createPlan: async (name: string, desc: string, id: string) => {
     const plan: DraftPlan = {
       id,
       name,
@@ -51,22 +68,55 @@ const storeSlice: StateCreator<DraftStore> = (set) => ({
       threats: [],
       timings: [],
     };
-    set((s) => ({ plans: [plan, ...s.plans] }));
-  },
-  deletePlan: (id: string) => {
-    set((s) => ({
-      plans: s.plans.filter((p) => p.id !== id),
-    }));
-  },
-  updatePlan: (plan: DraftPlan) => {
-    set((s) => ({ plans: s.plans.map((p) => (p.id === plan.id ? plan : p)) }));
-  },
-  setHeroes: (heroes: OpenDotaHero[]) => set({ heroes }),
-  setLoadingHeroes: (v: boolean) => set({ loadingHeroes: v }),
-  setHydrated: (v: boolean) => set({ hydrated: v }),
-  setApiError: (err: string | null) => set({ apiError: err }),
-});
 
-export const useDraftStore = create<DraftStore>()(
-  persist(storeSlice, persistConfig),
-);
+    set((s) => ({ plans: [plan, ...s.plans] }));
+
+    try {
+      const res = await fetch(`${API_BASE}/api/plans`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(plan),
+      });
+      if (!res.ok) throw new Error("Database rejection");
+    } catch (err) {
+      set((s) => ({
+        plans: s.plans.filter((p) => p.id !== id),
+        apiError: "Failed to save plan to database.",
+      }));
+    }
+  },
+
+  deletePlan: async (id: string) => {
+    const previousPlans = get().plans;
+    set((s) => ({ plans: s.plans.filter((p) => p.id !== id) }));
+
+    try {
+      const res = await fetch(`${API_BASE}/api/plans/${id}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) throw new Error("Database rejection");
+    } catch (err) {
+      set({ plans: previousPlans, apiError: "Failed to delete plan." });
+    }
+  },
+
+  updatePlan: async (plan: DraftPlan) => {
+    const previousPlans = get().plans;
+    set((s) => ({ plans: s.plans.map((p) => (p.id === plan.id ? plan : p)) }));
+
+    try {
+      const res = await fetch(`${API_BASE}/api/plans/${plan.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(plan),
+      });
+      if (!res.ok) throw new Error("Database rejection");
+    } catch (err) {
+      set({ plans: previousPlans, apiError: "Failed to sync updates." });
+    }
+  },
+
+  setHeroes: (heroes) => set({ heroes }),
+  setLoadingHeroes: (v) => set({ loadingHeroes: v }),
+  setApiError: (err) => set({ apiError: err }),
+}));

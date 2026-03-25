@@ -1,4 +1,4 @@
-import type { ReactNode, JSX } from "react";
+import { type ReactNode, type JSX, useState } from "react";
 import type {
   DraftPlan,
   OpenDotaHero,
@@ -6,8 +6,7 @@ import type {
   PickEntry,
 } from "../types/types";
 import { PRIORITY_COLORS } from "../constants/constants";
-import { Modal, HeroBadge } from "./SharedUI";
-
+import { Modal, HeroBadge, Icon } from "./SharedUI";
 interface SummaryModalProps {
   plan: DraftPlan;
   heroMap: Record<number, OpenDotaHero>;
@@ -25,6 +24,60 @@ export default function SummaryModal({
     children: ReactNode;
     count: number;
   }
+
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      let text = `🛡️ DRAFT PLAN: ${plan.name.toUpperCase()}\n`;
+      if (plan.desc) text += `📝 ${plan.desc}\n`;
+      text += `\n`;
+
+      if (plan.bans.length > 0) {
+        text += `🚫 BANS:\n`;
+        plan.bans.forEach((b) => {
+          const heroName = heroMap[b.heroId]?.localized_name || "Unknown Hero";
+          text += `- ${heroName}${b.note ? ` (${b.note})` : ""}\n`;
+        });
+        text += `\n`;
+      }
+
+      if (plan.picks.length > 0) {
+        text += `⭐ PREFERRED PICKS:\n`;
+        plan.picks.forEach((p) => {
+          const heroName = heroMap[p.heroId]?.localized_name || "Unknown Hero";
+          const priority = p.priority ? `[${p.priority}] ` : "";
+          const role = p.role ? ` - ${p.role}` : "";
+          text += `${priority}${heroName}${role}${p.note ? `\n  ↳ ${p.note}` : ""}\n`;
+        });
+        text += `\n`;
+      }
+
+      if (plan.threats.length > 0) {
+        text += `⚔️ ENEMY THREATS:\n`;
+        plan.threats.forEach((t) => {
+          const heroName = heroMap[t.heroId]?.localized_name || "Unknown Hero";
+          text += `- ${heroName}${t.note ? ` (${t.note})` : ""}\n`;
+        });
+        text += `\n`;
+      }
+
+      if (plan.timings.length > 0) {
+        text += `⏱️ KEY TIMINGS:\n`;
+        plan.timings.forEach((t) => {
+          text += `- ${t.item}${t.explanation ? `: ${t.explanation}` : ""}\n`;
+        });
+      }
+
+      await navigator.clipboard.writeText(text.trim());
+
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy text: ", err);
+      alert("Failed to copy to clipboard.");
+    }
+  };
 
   const Section = ({
     title,
@@ -72,19 +125,57 @@ export default function SummaryModal({
   return (
     <Modal onClose={onClose} title={`Draft Summary — ${plan.name}`} wide>
       <div style={{ padding: "24px 28px" }}>
-        {plan.desc && (
-          <p
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "flex-start",
+            marginBottom: 24,
+          }}
+        >
+          <div style={{ flex: 1 }}>
+            {plan.desc && (
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: 14,
+                  color: "#6080a0",
+                  fontStyle: "italic",
+                  lineHeight: 1.6,
+                }}
+              >
+                {plan.desc}
+              </p>
+            )}
+          </div>
+
+          <button
+            onClick={handleCopy}
             style={{
-              margin: "0 0 24px",
-              fontSize: 14,
-              color: "#6080a0",
-              fontStyle: "italic",
-              lineHeight: 1.6,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              padding: "8px 16px",
+              background: copied ? "#1e5040" : "#1e3050",
+              border: copied ? "1px solid #44cc88" : "1px solid #2a4060",
+              borderRadius: 8,
+              color: copied ? "#44cc88" : "#c8d8f0",
+              cursor: "pointer",
+              fontSize: 13,
+              fontWeight: 700,
+              fontFamily: "'Rajdhani', sans-serif",
+              letterSpacing: 1,
+              transition: "all 0.2s ease",
             }}
           >
-            {plan.desc}
-          </p>
-        )}
+            {copied ? (
+              <Icon name="check" size={16} />
+            ) : (
+              <Icon name="edit" size={16} />
+            )}
+            {copied ? "COPIED!" : "COPY TO CLIPBOARD"}
+          </button>
+        </div>
 
         <Section title="Ban List" color="#c84040" count={plan.bans.length}>
           {plan.bans.length === 0 ? (

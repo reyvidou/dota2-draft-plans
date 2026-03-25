@@ -55,8 +55,9 @@ export default function PlanDetail() {
     heroMap[h.id] = h;
   });
 
-  const patch = (partial: Partial<DraftPlan>): void =>
+  const patch = (partial: Partial<DraftPlan>): void => {
     updatePlan({ ...plan, ...partial });
+  };
 
   const addHeroToBans = (hero: OpenDotaHero): void => {
     if (plan.bans.find((i) => i.heroId === hero.id)) return;
