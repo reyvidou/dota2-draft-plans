@@ -1,0 +1,99 @@
+Project dota2_draft_planner {
+  database_type: "PostgreSQL"
+  Note: '''
+    Dota 2 Draft Planner backend schema.
+    All game-state (bans, picks, threats, timings) is stored as JSONB columns
+    on draft_plans so the shape can evolve without migrations.
+    The api_cache table avoids hammering OpenDota on every request.
+    background_jobs supports SKIP LOCKED polling for async work.
+  '''
+}
+
+// USERS
+Table users {
+  id           uuid        [pk, default: `gen_random_uuid()`, note: "Primary key"]
+  username     varchar(50) [unique, not null, note: "Login handle, 3–50 chars"]
+  password_hash varchar(255) [not null, note: "bcrypt hash (cost ≥ 12)"]
+  created_at   timestamptz [default: `CURRENT_TIMESTAMP`, note: "Account creation time (UTC)"]
+
+  Note: "Application users. Passwords are never stored in plain text."
+}
+
+// DRAFT PLANS
+// Each JSONB column stores a typed array; see TypeScript interfaces below.
+//
+// BanEntry    → { id: string, heroId: number, note: string }
+// PickEntry   → { id: string, heroId: number, role: string,
+//                 priority: "High"|"Medium"|"Low"|"", note: string }
+// ThreatEntry → { id: string, heroId: number, note: string }
+// TimingEntry → { id: string, item: string, explanation: string }
+//
+// heroId values are canonical OpenDota /api/heroes integer IDs.
+
+Table draft_plans {
+  id          uuid         [pk, default: `gen_random_uuid()`, note: "Plan UUID"]
+  user_id     uuid         [ref: > users.id, note: "Owner; CASCADE DELETE"]
+  name        varchar(100) [not null, note: "Short display name for the plan"]
+  description text         [note: "Optional free-text strategy description"]
+  bans        jsonb        [default: `'[]'::jsonb`, note: "Array of BanEntry objects"]
+  picks       jsonb        [default: `'[]'::jsonb`, note: "Array of PickEntry objects"]
+  threats     jsonb        [default: `'[]'::jsonb`, note: "Array of ThreatEntry objects"]
+  timings     jsonb        [default: `'[]'::jsonb`, note: "Array of TimingEntry objects"]
+  created_at  timestamptz  [default: `CURRENT_TIMESTAMP`, note: "Row creation time (UTC)"]
+  updated_at  timestamptz  [default: `CURRENT_TIMESTAMP`, note: "Last mutation time; set by UPDATE statements"]
+
+  indexes {
+    user_id             [name: "idx_draft_plans_user_id"]
+    created_at          [name: "idx_draft_plans_created_at"]
+    (user_id, created_at) [name: "idx_draft_plans_user_created", note: "Covers paginated listing per user"]
+  }
+
+  Note: '''
+    Core entity. All list data is JSONB to avoid schema churn as the game
+    meta changes. heroId values in every JSONB entry reference OpenDota IDs,
+    not stored strings, so display names stay in sync with the heroes API.
+  '''
+}
+
+// API CACHE
+// Single-row-per-endpoint cache for proxied third-party APIs (OpenDota).
+// TTL is enforced in application code (server.ts) — 24 h for hero data.
+Table api_cache {
+  endpoint      varchar(255) [pk, note: "Logical key, e.g. 'opendota_heroes'"]
+  response_data jsonb        [not null, note: "Full JSON response body from upstream"]
+  updated_at    timestamptz  [default: `CURRENT_TIMESTAMP`, note: "Time of last successful upstream fetch"]
+
+  Note: '''
+    Avoids repeated calls to OpenDota. The application upserts a row after
+    every successful fetch; staleness is checked by comparing updated_at
+    against the configured TTL before deciding whether to re-fetch.
+  '''
+}
+
+// BACKGROUND JOBS
+// Polled with SELECT … FOR UPDATE SKIP LOCKED so multiple workers can
+// safely dequeue without coordination overhead.
+
+Table background_jobs {
+  id         uuid        [pk, default: `gen_random_uuid()`, note: "Job UUID"]
+  plan_id    uuid        [ref: > draft_plans.id, note: "Associated plan; CASCADE DELETE"]
+  status     varchar(20) [default: "pending", note: "'pending' | 'processing' | 'completed' | 'failed'"]
+  result     jsonb       [note: "Worker output stored on completion"]
+  created_at timestamptz [default: `CURRENT_TIMESTAMP`, note: "Enqueue time (UTC)"]
+
+  indexes {
+    status [name: "idx_jobs_status", note: "Used by SKIP LOCKED polling query"]
+  }
+
+  Note: '''
+    Lightweight job queue backed by PostgreSQL.
+    Workers poll: SELECT * FROM background_jobs
+                  WHERE status = 'pending'
+                  ORDER BY created_at
+                  FOR UPDATE SKIP LOCKED
+                  LIMIT 1;
+    Then SET status = 'processing', do work, SET status = 'completed' / 'failed'.
+  '''
+}
+
+
